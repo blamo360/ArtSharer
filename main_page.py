@@ -6,22 +6,21 @@ import subprocess
 root = Tk()
 root.geometry("1000x700")
 root.configure(bg= "#aaaaaa")
-root.resizable(False, False)
 
-root.grid_columnconfigure((0,1),weight=1)
-root.grid_rowconfigure((0,1),weight=1)
+root.grid_columnconfigure(1,weight=1)
+root.grid_rowconfigure(1,weight=1)
 
-frame1 = Frame(root, bg = "#cccccc")
+frame1 = Frame(root, bg = "#cccccc", width=980, height=50)
 #frame1.grid(row = 0, column = 0, columnspan = 2)
-frame1.place(x = 10, y = 10, width=980, height=50, anchor = NW)
+frame1.grid(row=0, column=0, columnspan= 2, sticky= "WE", padx= 5, pady= (5,0))
 
-frame2 = Frame(root, bg = "#cccccc")
+frame2 = Frame(root, bg = "#cccccc", width=130, height= 620)
 #frame1.grid(row = 1, column = 0)
-frame2.place(x = 10, y = 70, width=130, height= 620, anchor = NW)
+frame2.grid(row=1, column=0, sticky = "NSWE", padx= 5, pady = 5)
 
-frame3 = Frame(root, bg = "#dddddd")
+frame3 = Frame(root, bg = "#dddddd", width=840, height= 620)
 #frame1.grid(row = 1, column = 1)
-frame3.place(x = 150, y = 70, width=840, height= 620, anchor = NW)
+frame3.grid(row=1, column=1, sticky = "NSWE", padx= 5, pady= 5)
 
 def send():
     subprocess.run(["python", "archive/loginpage1.py"])
