@@ -1,10 +1,10 @@
-from tkinter import *
-from tkinter import ttk
 from PIL import Image, ImageTk
+import tkinter
+import customtkinter
 
 
 
-class Start(Tk):
+class Start(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
@@ -26,42 +26,39 @@ class Start(Tk):
 
     def kill():
         root.destroy()
-        import login_page1
+        import login_page_1
 
     def main_page(self):
-        self.menu_bar_frame = ttk.Frame(self,style = "Card.TFrame")
+        self.menu_bar_frame = customtkinter.CTkFrame(self)
         self.menu_bar_frame.grid(row=0, column=0, columnspan= 2, sticky= "WE", padx= 5, pady= (5,0))
 
-        self.main_filter_frame = ttk.Frame(self,style = "Card.TFrame")
+        self.main_filter_frame = customtkinter.CTkFrame(self)
         self.main_filter_frame.grid(row=1, column=0, sticky = "NSWE", padx= (5,0), pady = 5)
 
-        self.main_window_frame = ttk.Frame(self, style = "Card.TFrame")
+        self.main_window_frame = customtkinter.CTkFrame(self)
         self.main_window_frame.grid(row=1, column=1, sticky = "NSWE", padx= 5, pady= 5)
 
         self.main_window_frame.rowconfigure(1, weight= 1)
         self.main_window_frame.columnconfigure(0, weight= 1)
 
-        self.minor_filter_frame = ttk.Frame(self.main_window_frame)
+        self.minor_filter_frame = customtkinter.CTkFrame(self.main_window_frame)
         self.minor_filter_frame.grid(row=0, column=0,sticky="NSWE", padx=5, pady=5)
 
-        self.gallery_seperator = ttk.Separator(self.main_window_frame)
-        self.gallery_seperator.grid(row = 1, sticky="NWE", pady=5)
-
-        self.gallery = ttk.Frame(self.main_window_frame, style = "Card.TFrame")
-        self.gallery.grid(row=2, column=0,sticky="NSWE", padx=5, pady=5)
+        self.gallery = customtkinter.CTkFrame(self.main_window_frame)
+        self.gallery.grid(row=1, column=0,sticky="NSWE", padx=5, pady=5)
 
     def menu_bar(self):
         self.menu_opt = ["quan", "too", "quan", "quan"]
         self.menu_bar_frame.columnconfigure(list(range(0,len(self.menu_opt))), weight=1)
 
         for i in range(len(self.menu_opt)):
-            self.btn1 = ttk.Button(self.menu_bar_frame, text = self.menu_opt[i])
+            self.btn1 = customtkinter.CTkButton(self.menu_bar_frame, text = self.menu_opt[i])
             self.btn1.grid(row=0,column=i,sticky="WE", padx= 10, pady= 10)
 
     def search_bar(self):
-        self.searchbar = ttk.Entry(self.menu_bar_frame)
+        self.searchbar = customtkinter.CTkEntry(self.menu_bar_frame)
         self.searchbar.grid(row=1, column= 0, sticky="NSWE", columnspan = len(self.menu_opt) - 1, padx = 5, pady= 5)
-        searchbtn = ttk.Button(self.menu_bar_frame, command=self.kill, text= "search")
+        searchbtn = customtkinter.CTkButton(self.menu_bar_frame, command=self.kill, text= "search")
         searchbtn.grid(row=1, column=len(self.menu_opt) - 1, sticky="NSWE", padx=20, pady=5)
 
     def main_filter_bar(self):
@@ -71,17 +68,17 @@ class Start(Tk):
         self.main_filter_frame.columnconfigure(0, weight=1)
 
         for i in range(len(mainfilterselect)):
-            btn1 = ttk.Button(self.main_filter_frame, text = mainfilterselect[i])
+            btn1 = customtkinter.CTkButton(self.main_filter_frame, text = mainfilterselect[i])
             btn1.grid(row=i,column=0,sticky="WE", padx= 10, pady= 10)
 
     def minor_filter_bar(self):
         minorfilters = ["quan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
         for i in range(len(minorfilters)):
-            filterframe = Frame(self.minor_filter_frame)
+            filterframe = customtkinter.CTkFrame(self.minor_filter_frame)
             filterframe.grid(row=0, column=i, sticky="WE", padx=5, pady=5)
-            filtertext = ttk.Label(filterframe, text = minorfilters[i])
+            filtertext = customtkinter.CTkLabel(filterframe, text = minorfilters[i])
             filtertext.grid(row=0, column=0)
-            minorfilterclose = ttk.Button(filterframe, text="x")
+            minorfilterclose = customtkinter.CTkButton(filterframe, text="x")
             minorfilterclose.grid(row=0, column= 1)
 
 if __name__ == "__main__":
