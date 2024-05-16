@@ -26,7 +26,7 @@ class Start(Tk):
 
     def kill():
         root.destroy()
-        import login_page1
+        import login_page_1
 
     def main_page(self):
         self.menu_bar_frame = ttk.Frame(self,style = "Card.TFrame")
