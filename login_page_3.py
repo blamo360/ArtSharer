@@ -2,8 +2,8 @@ from tkinter import *
 import customtkinter
 from PIL import Image, ImageTk, ImageOps
 import sqlite3
-
-
+import main_page_4
+import subprocess
 
 customtkinter.set_appearance_mode("light")
 
@@ -39,26 +39,42 @@ class Login(Tk):
         self.logo = Label(self.loginframe, image=self.logoimg)
         self.logo.grid(row=0, column=0, columnspan=2, pady=10)
 
-        self.loginlabel = customtkinter.CTkLabel(self.loginframe, text="Username")
+        self.loginlabel = customtkinter.CTkLabel(self.loginframe, text="Email")
         self.loginlabel.grid(row=1, column=0, padx=10, pady=10)
 
         self.passwordlabel = customtkinter.CTkLabel(self.loginframe, text="Password")
         self.passwordlabel.grid(row=2, column=0, padx=10, sticky="NWE")
         
-        self.usernameinput = customtkinter.CTkEntry(self.loginframe)
-        self.usernameinput.grid(row=1,column=1, sticky="NWE", padx = 10, pady=10)
+        self.emailinput = customtkinter.CTkEntry(self.loginframe)
+        self.emailinput.grid(row=1,column=1, sticky="NWE", padx = 10, pady=10)
 
         self.passwordinput = customtkinter.CTkEntry(self.loginframe)
         self.passwordinput.grid(row=2, column=1, sticky="NWE", padx = 10)
 
-        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Login")
+        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Login", command=self.logindb)
         self.loginbtn.grid(row=2, column=0, columnspan=2, pady=(200,10))
 
-connection = sqlite3.connect("artsharer.db")
-cur = connection.cursor()
+    def logindb(self):
+        connection = sqlite3.connect("artsharer.db")
+        cur = connection.cursor()
+        email = self.emailinput.get()
+        password = self.passwordinput.get()
+
+        cur.execute("SELECT * FROM loginfo Where email='{}' and password='{}'".format(email, password))
+        loginver = cur.fetchone()
+
+        if loginver == None:
+            print("Invalid email or password")
+        
+        else:
+            self.destroy()
+            subprocess.run(["python","main_page_4.py"])
+
+            
+        
+
 
 if __name__ == "__main__":
     root = Login()
-    
     root.mainloop()
 

@@ -1,8 +1,9 @@
 from PIL import Image, ImageTk
 import tkinter
 import customtkinter
-
-
+import sqlite3
+import asyncio
+from python_gelbooru import AsyncGelbooru
 
 class Start(customtkinter.CTk):
     def __init__(self):
@@ -24,7 +25,7 @@ class Start(customtkinter.CTk):
         self.main_filter_bar()
         self.minor_filter_bar()
 
-    def kill():
+    def kill(self):
         root.destroy()
         import login_page_1
 
@@ -42,9 +43,9 @@ class Start(customtkinter.CTk):
         self.main_window_frame.columnconfigure(0, weight= 1)
 
         self.minor_filter_frame = customtkinter.CTkFrame(self.main_window_frame)
-        self.minor_filter_frame.grid(row=0, column=0,sticky="NSWE", padx=5, pady=5)
+        self.minor_filter_frame.grid(row=0, column=0,sticky="NWE", padx=5, pady=5)
 
-        self.gallery = customtkinter.CTkFrame(self.main_window_frame)
+        self.gallery = customtkinter.CTkScrollableFrame(self.main_window_frame)
         self.gallery.grid(row=1, column=0,sticky="NSWE", padx=5, pady=5)
 
     def menu_bar(self):
@@ -53,7 +54,7 @@ class Start(customtkinter.CTk):
 
         for i in range(len(self.menu_opt)):
             self.btn1 = customtkinter.CTkButton(self.menu_bar_frame, text = self.menu_opt[i])
-            self.btn1.grid(row=0,column=i,sticky="WE", padx= 10, pady= 10)
+            self.btn1.grid(row=0,column=i,sticky="W", padx= 10, pady= 10)
 
     def search_bar(self):
         self.searchbar = customtkinter.CTkEntry(self.menu_bar_frame)
@@ -69,7 +70,7 @@ class Start(customtkinter.CTk):
 
         for i in range(len(mainfilterselect)):
             btn1 = customtkinter.CTkButton(self.main_filter_frame, text = mainfilterselect[i])
-            btn1.grid(row=i,column=0,sticky="WE", padx= 10, pady= 10)
+            btn1.grid(row=i,column=0,sticky="W", padx= 10, pady= 10)
 
     def minor_filter_bar(self):
         minorfilters = ["quan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
@@ -77,9 +78,10 @@ class Start(customtkinter.CTk):
             filterframe = customtkinter.CTkFrame(self.minor_filter_frame)
             filterframe.grid(row=0, column=i, sticky="WE", padx=5, pady=5)
             filtertext = customtkinter.CTkLabel(filterframe, text = minorfilters[i])
-            filtertext.grid(row=0, column=0)
-            minorfilterclose = customtkinter.CTkButton(filterframe, text="x")
-            minorfilterclose.grid(row=0, column= 1)
+            filtertext.grid(row=0, column=0, padx=10)
+            minorfilterclose = customtkinter.CTkButton(filterframe, text="x", width=0, fg_color="transparent")
+            minorfilterclose.grid(row=0, column= 1, padx=(0,5), pady=2)
+    
 
 if __name__ == "__main__":
     root = Start()

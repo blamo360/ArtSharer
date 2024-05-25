@@ -19,15 +19,5 @@ bg.place(relx= 0.5, rely= 0.5, relheight= 1, relwidth=1, anchor= CENTER)
 frame1.place(relx=0.5, rely=0.5, width=300, height=500, anchor = CENTER)
 
 
-
-artsharer = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="Linc0646!",
-    database="artsharer"
-)
-
-cur = artsharer.cursor()
-
 root.mainloop()
 
