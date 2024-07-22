@@ -2,13 +2,9 @@ from tkinter import *
 import customtkinter
 from PIL import Image, ImageTk, ImageOps
 import sqlite3
-import main_page_4
 import subprocess
 
-customtkinter.set_appearance_mode("light")
-
-
-class Login(Tk):
+class Login(Toplevel):
     def __init__(self):
         super().__init__()
         self.geometry("500x700")
@@ -62,22 +58,18 @@ class Login(Tk):
         subprocess.run(["python","register_page_2.py"])
 
     def logindb(self):
-        connection = sqlite3.connect("artsharer.db")
+        connection = sqlite3.connect("users/artsharer.db")
         cur = connection.cursor()
         email = self.emailinput.get()
         password = self.passwordinput.get()
 
-        cur.execute("SELECT * FROM loginfo Where email='{}' and password='{}'".format(email, password))
-        loginver = cur.fetchone()
+        cur.execute("SELECT userID FROM loginfo WHERE email='{}' and password='{}'".format(email, password))
+        self.userID = cur.fetchone()[0]
 
-        if loginver == None:
+        if self.userID == None:
             print("Invalid email or password")
         
         else:
+            cur.execute("")
             self.destroy()
-            subprocess.run(["python","main_page_4.py"])
-
-if __name__ == "__main__":
-    root = Login()
-    root.mainloop()
 

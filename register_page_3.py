@@ -3,7 +3,7 @@ import customtkinter
 from PIL import Image, ImageTk, ImageOps
 import sqlite3
 import subprocess
-
+import random
 
 
 customtkinter.set_appearance_mode("light")
@@ -18,6 +18,7 @@ class Login(Tk):
 
         self.tk.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open("img\placeholders\iconn.png")))
 
+        
         self.login()
   
 
@@ -83,7 +84,7 @@ class Login(Tk):
 
     
     def signup(self):
-        connection = sqlite3.connect("artsharer.db")
+        connection = sqlite3.connect("users/artsharer.db")
         cur = connection.cursor()
 
         #usernname validation
@@ -117,15 +118,19 @@ class Login(Tk):
                         print("Email already exists")
 
                     else:
+                        newUserID = random.randint(100000000, 999999999)
+                        userSettings = '{"theme": "dark"}'
                         #add info
-                        cur.execute("insert into loginfo (username,password,email) values('{}','{}','{}')".format(self.usernameinput.get(), self.passwordinput.get(), self.emailinput.get()))
+                        cur.execute("INSERT INTO loginfo (userID,username,password,email) values({},'{}','{}','{}')".format(newUserID, self.usernameinput.get(), self.passwordinput.get(), self.emailinput.get()))
+                        #creates new user info fields
+                        cur.execute("INSERT INTO userinfo (userID,value) values({},'{}')".format(newUserID, userSettings))
+                        
                         connection.commit()
-
                         connection.close()
+
                         print("Registration successful!")
                 
 if __name__ == "__main__":
     root = Login()
-    
     root.mainloop()
 
