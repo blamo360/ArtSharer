@@ -84,7 +84,7 @@ class Login(Tk):
 
     
     def signup(self):
-        connection = sqlite3.connect("users/artsharer.db")
+        connection = sqlite3.connect("artsharer.db")
         cur = connection.cursor()
 
         #usernname validation
@@ -118,7 +118,16 @@ class Login(Tk):
                         print("Email already exists")
 
                     else:
-                        newUserID = random.randint(100000000, 999999999)
+
+                        #unique ID check
+                        while True:
+                            newUserID = random.randint(0, 999999998)
+                            UserIDver = cur.execute("SELECT userID FROM loginfo WHERE userID = '{}'".format(newUserID))
+                            UserIDver = UserIDver.fetchone()
+                            print(newUserID)
+                            if UserIDver == None:
+                                break
+                        
                         userSettings = '{"theme": "dark"}'
                         #add info
                         cur.execute("INSERT INTO loginfo (userID,username,password,email) values({},'{}','{}','{}')".format(newUserID, self.usernameinput.get(), self.passwordinput.get(), self.emailinput.get()))

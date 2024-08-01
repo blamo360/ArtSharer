@@ -1,13 +1,15 @@
-import tkinter
+from CTkMessagebox import CTkMessagebox
+from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 import customtkinter
 import sqlite3
-import login_page_4
 from login_page_4 import Login
 from tkinter import filedialog as fd
+import random
+import json
 
 
-class Start(customtkinter.CTk):
+class Start(Tk):
     def __init__(self):
         super().__init__()
 
@@ -21,8 +23,6 @@ class Start(customtkinter.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        #User info
-
         self.main_page()
         self.menu_bar()
         self.search_bar()
@@ -31,8 +31,6 @@ class Start(customtkinter.CTk):
         self.upload_button()
 
         self.upload = None
-
-        #self.loginpanel = Login()
 
     def main_page(self):
         self.menu_bar_frame = customtkinter.CTkFrame(self)
@@ -108,20 +106,20 @@ class Start(customtkinter.CTk):
 
     def uploadimg(self):
         if self.upload is None or not self.upload.winfo_exists():
-            self.upload = customtkinter.CTkToplevel(self)
-            self.upload.geometry("800x500")
 
             #file upload
             add = fd.askopenfilename()
-            image = Image.open(add)
-            dimensions = Image.open(add)
-            image = ImageOps.contain(image, (700, 99999))
-            image = ImageTk.PhotoImage(image)
-            dimensions = ImageTk.PhotoImage(dimensions)
 
-            image_dimensions = "%dx%d" % (dimensions.width(), dimensions.height())
+            image = Image.open(add)
+            resized = ImageOps.contain(image, (500, 500))
+            width, height = resized.size
+            newpic = ImageTk.PhotoImage(resized)
+
+            image_dimensions = "%dx%d" % (width, height)
             
-            
+            self.upload = customtkinter.CTkToplevel(self)
+            self.upload.geometry("530x%d" % (height + 270))
+
             image_frame = customtkinter.CTkFrame(self.upload)
             image_frame.grid(row = 0, column = 0, padx = 5, pady = 5, sticky = "NWSE")
 
@@ -129,26 +127,26 @@ class Start(customtkinter.CTk):
             image_frame.grid_columnconfigure(0, weight = 2)
             image_frame.grid_columnconfigure(1, weight = 8)
 
-            image_label = customtkinter.CTkLabel(image_frame, image=image, text="")
-            image_label.grid(row = 0, column = 0, columnspan = 2, padx = 10, pady = 10)
-
+            image_label = customtkinter.CTkLabel(image_frame, image=newpic, text="") # type: ignore
+            image_label.grid(row = 0, column = 0, columnspan = 2, padx = 10, pady = 10, sticky = "NSEW")
+            
             size_label = customtkinter.CTkLabel(image_frame, text = image_dimensions)
-            name_label = customtkinter.CTkLabel(image_frame, text = "Name")
-            name_input = customtkinter.CTkEntry(image_frame)
-            desc_label = customtkinter.CTkLabel(image_frame, text = "Description")
-            desc_input = customtkinter.CTkEntry(image_frame)
+            name_label = customtkinter.CTkLabel(image_frame, text = "Title")
+            self.name_input = customtkinter.CTkEntry(image_frame)
+            caption_label = customtkinter.CTkLabel(image_frame, text = "Caption")
+            self.caption_input = customtkinter.CTkTextbox(image_frame, height = 100)
             tag_label = customtkinter.CTkLabel(image_frame, text = "Tags")
-            tag_input = customtkinter.CTkEntry(image_frame)
+            self.tag_input = customtkinter.CTkEntry(image_frame)
             submit_btn = customtkinter.CTkButton(image_frame, text = "Post", command = self.get_post_info)
             
             size_label.grid(row = 1, column = 0, columnspan = 2, sticky = "NEW", pady = 5)
             name_label.grid(row = 2, column = 0, sticky = "EW", pady = 5)
-            desc_label.grid(row = 3, column = 0, sticky = "EW", pady = 5)
+            caption_label.grid(row = 3, column = 0, sticky = "EW", pady = 5)
             tag_label.grid(row = 4, column = 0, sticky = "EW", pady = 5)
             
-            name_input.grid(row = 2, column = 1, sticky = "EW")
-            desc_input.grid(row = 3, column = 1, sticky = "EW")
-            tag_input.grid(row = 4, column = 1, sticky = "EW")
+            self.name_input.grid(row = 2, column = 1, sticky = "EW")
+            self.caption_input.grid(row = 3, column = 1, sticky = "EW")
+            self.tag_input.grid(row = 4, column = 1, sticky = "EW")
 
             submit_btn.grid(row = 5, column = 0, columnspan = 2, sticky = "EW")
 
@@ -157,8 +155,52 @@ class Start(customtkinter.CTk):
 
     def get_post_info(self):
             #database connection
-            connection = sqlite3.connect("users/artsharer.db")
+            connection = sqlite3.connect("artsharer.db")
             cur = connection.cursor()
+
+            #unique ID check
+            while True:
+                imgID = random.randint(0, 999999998)
+                imgID_ver = cur.execute("SELECT userID FROM loginfo WHERE userID = '{}'".format(imgID))
+                imgID_ver = imgID_ver.fetchone()
+                if imgID_ver == None:
+                    break
+            
+            #tag format: space = new tag, underslash(_) = seperator
+            #tag checker
+            tags = (self.tag_input.get().lower()).split(" ")
+            
+            for i in tags:
+                #checking if tag exists in database
+                tagName = cur.execute("SELECT tagName FROM taginfo WHERE tagName = '{}'".format(i))
+                tagName = tagName.fetchone()
+                if tagName == None:
+                    #conversion to string representation of list for storing
+                    imgIDstr = []
+                    imgIDstr = [imgID]
+                    imgIDstr = json.dumps(imgIDstr)
+                    #create new tag entry
+                    cur.execute("INSERT INTO taginfo(tagName,imgAmount,imgIDs) values('{}',{},'{}')".format(i, 1, imgIDstr))
+                else:
+                    #string -> list
+                    cur.execute("SELECT imgAmount FROM taginfo WHERE tagName = '{}'".format(tagName))
+                    imgAmount = cur.fetchone()
+                    imgAmount = imgAmount + 1
+
+                    imgIDs = []
+                    cur.execute("SELECT imgIDs FROM taginfo WHERE tagName = '{}'".format(tagName))
+                    imgIDs = cur.fetchone()
+
+                    imgIDs = json.loads(imgIDs)
+                    imgIDs.append(imgID)
+
+            tags = json.dumps(tags)
+            cur.execute("INSERT INTO imginfo (imgID,imgName,imgCaptions,imgTags) values({},'{}','{}','{}')".format(imgID, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tags))
+
+            connection.commit()
+            connection.close()
+
+
 
 
 if __name__ == "__main__":

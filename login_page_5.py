@@ -64,9 +64,9 @@ class Login(Toplevel):
         password = self.passwordinput.get()
 
         cur.execute("SELECT userID FROM loginfo WHERE email='{}' and password='{}'".format(email, password))
-        self.userID = cur.fetchone()[0]
+        userID = cur.fetchone()[0]
 
-        if self.userID == None:
+        if userID is None:
             print("Invalid email or password")
         
         else:
