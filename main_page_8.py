@@ -26,6 +26,9 @@ class Start(Tk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
+        self.pagenum = 0
+        self.searchcompiled =[]
+
         self.main_page()
         self.menu_bar()
         self.search_bar()
@@ -75,13 +78,58 @@ class Start(Tk):
 
         self.login = customtkinter.CTkButton(self.loginFrame, text = "Sign Up")
         self.login.grid(row = 0, column = 1, sticky = "W", padx= (0,10), pady= 10)
-        
 
     def search_bar(self):
         self.searchbar = customtkinter.CTkEntry(self.menu_bar_frame)
         self.searchbar.grid(row=1, column= 0, sticky="NSWE", columnspan = len(self.menu_opt), padx = 5, pady= (0,10))
-        searchbtn = customtkinter.CTkButton(self.menu_bar_frame, text= "search")
+        searchbtn = customtkinter.CTkButton(self.menu_bar_frame, text= "search", command = self.search)
         searchbtn.grid(row=1, column=len(self.menu_opt), sticky="NSWE", padx=20, pady=(0,10))
+
+    def search(self):
+        searchnum = 0
+        searchstring = self.searchbar.get()
+        if searchstring == "":
+            searchlist = []
+        else:
+            searchlist = (searchstring.lower()).split(" ")
+        
+        connection = sqlite3.connect("artsharer.db")
+        cur = connection.cursor()
+        
+        #compile image IDs to search for
+        if searchlist == []:
+            break
+        elif searchlist.count() == 1:
+            cur.execute(f"SELECT imgIDs FROM taginfo WHERE tagName = {searchlist[0]}")
+            tag = cur.fetchall()
+
+            if tag is None:
+                #tag does not exist
+                CTkMessagebox(message = "tag does not exist!")
+
+            else:
+                self.searchcompiled = tag
+        else:
+            for i in searchlist:
+                cur.execute(f"SELECT imgIDs FROM taginfo WHERE tagName = {i}")
+                tag = cur.fetchall()
+
+                if tag is None:
+                    #tag does not exist
+                    break
+                else:
+                    if searchnum == 0:
+                        search1 = tag
+                        searchnum = searchnum + 1
+                    else:
+                        search2 = tag
+
+                        for j in search1:
+                            for n in search2:
+                                if j == n:
+                                    self.searchcompiled.append(j)
+                            else:
+                                continue
 
     def main_filter_bar(self):
         mainfilterselect = ["quknhjhan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
@@ -107,11 +155,10 @@ class Start(Tk):
         addbtn = customtkinter.CTkButton(self.main_window_frame, text="+", width=75, height=75, command=self.uploadimg)
         addbtn.place(anchor = "se", relx = 1, rely = 1, x = -30, y = -30)
 
-
-
-
-
-
+    def imggallery(self):
+        imgframe = customtkinter.CTkFrame(self.gallery)
+        
+        
     def uploadimg(self):
         if self.upload is None or not self.upload.winfo_exists():
 
@@ -165,52 +212,46 @@ class Start(Tk):
             #database connection
             connection = sqlite3.connect("artsharer.db")
             cur = connection.cursor()
-
-            #unique ID check
-            while True:
-                imgID = random.randint(0, 999999998)
-                imgID_ver = cur.execute("SELECT userID FROM loginfo WHERE userID = '{}'".format(imgID))
-                imgID_ver = imgID_ver.fetchone()
-                if imgID_ver == None:
-                    break
             
             #tag format: space = new tag, underslash(_) = seperator
-            #tag checker
+
+            imgFileName = os.path.basename(self.add)
+
             tags = (self.tag_input.get().lower()).split(" ")
+            tagsJSON = json.dumps(tags)
+            cur.execute("INSERT INTO imginfo (imgFileName, imgTitle,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(imgFileName, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tagsJSON))
+            connection.commit()
             
+            cur.execute("SELECT imgID FROM imginfo ORDER BY userID DESC LIMIT 1")
+            imgID = cur.fetchone()
+
             for i in tags:
                 #checking if tag exists in database
-                tagName = cur.execute("SELECT tagName FROM taginfo WHERE tagName = '{}'".format(i))
+                tagName = cur.execute(f"SELECT tagName FROM taginfo WHERE tagName = '{i}'")
                 tagName = tagName.fetchone()
                 if tagName == None:
                     #conversion to string representation of list for storing
-                    imgIDstr = []
                     imgIDstr = [imgID]
                     imgIDstr = json.dumps(imgIDstr)
                     #create new tag entry
                     cur.execute("INSERT INTO taginfo(tagName,imgAmount,imgIDs) values('{}',{},'{}')".format(i, 1, imgIDstr))
                 else:
                     #string -> list
-                    cur.execute("SELECT imgAmount FROM taginfo WHERE tagName = '{}'".format(tagName))
+                    cur.execute(f"SELECT imgAmount FROM taginfo WHERE tagName = '{i}'")
                     imgAmount = cur.fetchone()
                     imgAmount = imgAmount + 1
+                    cur.execute(f"UPDATE taginfo SET imgAmount = {imgAmount} WHERE tagName = {i}")
 
-                    imgIDs = []
                     cur.execute("SELECT imgIDs FROM taginfo WHERE tagName = '{}'".format(tagName))
                     imgIDs = cur.fetchone()
 
                     imgIDs = json.loads(imgIDs)
                     imgIDs.append(imgID)
+                    imgIDs = json.dumps(imgIDs)
+                    cur.execute(f"UPDATE taginfo SET imgIDs = {imgIDs} WHERE tagName = {i}")
 
             tags = json.dumps(tags)
-
-            imgFileName = os.path.basename(self.add)
-            print(imgFileName)
-            #uploading image
             shutil.copy2(self.add, "img/imguploads")
-
-            cur.execute("INSERT INTO imginfo (imgID, imgFileName, imgTitle,imgCaptions,imgTags) values({}, '{}', '{}','{}','{}')".format(imgID, imgFileName, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tags))
-
             
             connection.commit()
             connection.close()
