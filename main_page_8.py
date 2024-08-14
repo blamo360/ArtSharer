@@ -28,6 +28,8 @@ class Start(Tk):
 
         self.pagenum = 0
         self.searchcompiled =[]
+        self.upload = None
+        self.postwindow = None
 
         self.main_page()
         self.menu_bar()
@@ -35,8 +37,8 @@ class Start(Tk):
         self.main_filter_bar()
         self.minor_filter_bar()
         self.upload_button()
+        self.search()
 
-        self.upload = None
 
     def main_page(self):
         self.menu_bar_frame = customtkinter.CTkFrame(self)
@@ -65,8 +67,7 @@ class Start(Tk):
         for x,y in self.menu_opt:
             
             self.btn1 = customtkinter.CTkButton(self.menu_bar_frame, text = x)
-            self.btn1.grid(row = 0,column = i,sticky="EW", padx= 10, pady= 10,)
-            print(i)
+            self.btn1.grid(row = 0,column = i,sticky="EW", padx= 10, pady= 10)
             i=i+1
 
         #login frames
@@ -86,7 +87,9 @@ class Start(Tk):
         searchbtn.grid(row=1, column=len(self.menu_opt), sticky="NSWE", padx=20, pady=(0,10))
 
     def search(self):
+        #returns list(imgIDs)
         searchnum = 0
+        self.pagenum = 0
         searchstring = self.searchbar.get()
         if searchstring == "":
             searchlist = []
@@ -96,26 +99,34 @@ class Start(Tk):
         connection = sqlite3.connect("artsharer.db")
         cur = connection.cursor()
         
-        #compile image IDs to search for
+        #compiles image IDs to search for
         if searchlist == []:
-            break
-        elif searchlist.count() == 1:
+            cur.execute(f"SELECT imgID FROM imginfo")
+            self.searchcompiled = cur.fetchall()
+            self.searchcompiled = [i[0] for i in self.searchcompiled]
+
+        elif len(searchlist) == 1:
+            #for single searches
             cur.execute(f"SELECT imgIDs FROM taginfo WHERE tagName = {searchlist[0]}")
-            tag = cur.fetchall()
+            tag = cur.fetchone()
 
             if tag is None:
                 #tag does not exist
                 CTkMessagebox(message = "tag does not exist!")
 
             else:
+                tag = json.loads(tag)
                 self.searchcompiled = tag
         else:
+            #for multiple tags
             for i in searchlist:
                 cur.execute(f"SELECT imgIDs FROM taginfo WHERE tagName = {i}")
-                tag = cur.fetchall()
+                tag = cur.fetchone()
+                tag = json.loads(tag)
 
                 if tag is None:
                     #tag does not exist
+                    CTkMessagebox(message = "tag does not exist!")
                     break
                 else:
                     if searchnum == 0:
@@ -130,6 +141,70 @@ class Start(Tk):
                                     self.searchcompiled.append(j)
                             else:
                                 continue
+                            
+        self.updategallery()
+
+    def updategallery(self):
+        x = 0
+        y = 0
+        self.searchdisplay = self.searchcompiled[self.pagenum:(self.pagenum + 20)]
+        for i in self.searchdisplay:
+            if x <= 5:
+                self.imggallery(i, x, y)
+                x = x + 1
+            else:
+                x = 0
+                y = y + 1
+                self.imggallery(i, x, y)
+            
+            
+    def imggallery(self, imgID, x, y):
+        imgframe = customtkinter.CTkFrame(self.gallery)
+        titlename = customtkinter.CTkLabel(imgframe, text = "wawwawa")
+        
+        connection = sqlite3.connect("artsharer.db")
+        cur = connection.cursor()
+
+        #get image from 
+        cur.execute(f"SELECT imgFileName FROM imginfo WHERE imgID = {imgID}")
+        imgFileName = cur.fetchone()
+        imgFileName = imgFileName[0]
+
+        image = Image.open(f"img/imguploads/{imgFileName}")
+
+        resized = ImageOps.fit(image, (150, 150), centering =  (0.5, 0.5))
+        newpic = ImageTk.PhotoImage(resized)
+        imglabel = customtkinter.CTkButton(imgframe, image = newpic, text = "", command = lambda: self.postinfo(imgID), fg_color = "transparent")  # type: ignore
+
+        imgframe.grid(row = y, column = x, padx = 2, pady = 2)
+        imglabel.pack(padx = 5, pady = 5)
+        titlename.pack()
+        
+        connection.close()
+
+    def postinfo(self, imgID):
+        if self.postwindow is None or not self.postwindow.winfo_exists():
+            self.postwindow = customtkinter.CTkToplevel(self)
+
+            connection = sqlite3.connect("artsharer.db")
+            cur = connection.cursor()
+
+            cur.execute(f"SELECT imgFileName FROM imginfo WHERE imgID = {imgID}")
+            imgFileName = cur.fetchone()
+            imgFileName = imgFileName[0]
+
+            image = Image.open(f"img/imguploads/{imgFileName}")
+            resized = ImageOps.contain(image, (500, 500))
+            width, height = resized.size
+            newpic = ImageTk.PhotoImage(resized)
+
+            image_dimensions = "%dx%d" % (width, height)
+
+            cur.close()
+
+
+
+
 
     def main_filter_bar(self):
         mainfilterselect = ["quknhjhan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
@@ -155,13 +230,8 @@ class Start(Tk):
         addbtn = customtkinter.CTkButton(self.main_window_frame, text="+", width=75, height=75, command=self.uploadimg)
         addbtn.place(anchor = "se", relx = 1, rely = 1, x = -30, y = -30)
 
-    def imggallery(self):
-        imgframe = customtkinter.CTkFrame(self.gallery)
-        
-        
     def uploadimg(self):
         if self.upload is None or not self.upload.winfo_exists():
-
             #file upload
             self.add = fd.askopenfilename()
 
@@ -192,7 +262,7 @@ class Start(Tk):
             self.caption_input = customtkinter.CTkTextbox(image_frame, height = 100)
             tag_label = customtkinter.CTkLabel(image_frame, text = "Tags")
             self.tag_input = customtkinter.CTkEntry(image_frame)
-            submit_btn = customtkinter.CTkButton(image_frame, text = "Post", command = self.get_post_info)
+            submit_btn = customtkinter.CTkButton(image_frame, text = "Post", command = self.submitpost)
             
             size_label.grid(row = 1, column = 0, columnspan = 2, sticky = "NEW", pady = 5)
             name_label.grid(row = 2, column = 0, sticky = "EW", pady = 5)
@@ -208,7 +278,7 @@ class Start(Tk):
         else:
             self.upload.focus()
 
-    def get_post_info(self):
+    def submitpost(self):
             #database connection
             connection = sqlite3.connect("artsharer.db")
             cur = connection.cursor()
@@ -222,7 +292,7 @@ class Start(Tk):
             cur.execute("INSERT INTO imginfo (imgFileName, imgTitle,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(imgFileName, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tagsJSON))
             connection.commit()
             
-            cur.execute("SELECT imgID FROM imginfo ORDER BY userID DESC LIMIT 1")
+            cur.execute("SELECT imgID FROM imginfo ORDER BY imgID DESC LIMIT 1")
             imgID = cur.fetchone()
 
             for i in tags:
