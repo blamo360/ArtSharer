@@ -7,6 +7,8 @@ import subprocess
 class Login(Tk):
     def __init__(self):
         super().__init__()
+        self.passwordinput = None
+        self.email_input = None
         self.geometry("500x700")
         self.configure(bg="#555555")
 
@@ -17,49 +19,49 @@ class Login(Tk):
         self.resizable(False, False)
 
     def login(self):
-        self.frame1 = customtkinter.CTkFrame(self, width=300, height=500)
-        self.frame1.place(relx=0.5, rely=0.5, anchor = CENTER)
+        main_frame = customtkinter.CTkFrame(self, width=300, height=500)
+        main_frame.place(relx=0.5, rely=0.5, anchor = CENTER)
 
-        self.loginframe = customtkinter.CTkFrame(self.frame1, width=300, height=450, fg_color="transparent")
-        self.loginframe.place(relx=0.5, rely=0.5, anchor=CENTER)
+        login_frame = customtkinter.CTkFrame(main_frame, width=300, height=450, fg_color="transparent")
+        login_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-        self.logoimg = ImageTk.PhotoImage(ImageOps.contain(Image.open("img/placeholders/iconn.png"), (100, 100)))
+        logo_img = ImageTk.PhotoImage(ImageOps.contain(Image.open("img/placeholders/iconn.png"), (100, 100)))
 
-        self.logo = Label(self.loginframe, image=self.logoimg) # type: ignore
-        self.logo.grid(row=0, column=0, columnspan=2, pady=10)
+        logo = Label(login_frame, image=logo_img) # type: ignore
+        logo.grid(row=0, column=0, columnspan=2, pady=10)
 
-        self.loginlabel = customtkinter.CTkLabel(self.loginframe, text="Email")
-        self.loginlabel.grid(row=1, column=0, padx=10, pady=10)
+        login_label = customtkinter.CTkLabel(login_frame, text="Email")
+        login_label.grid(row=1, column=0, padx=10, pady=10)
 
-        self.passwordlabel = customtkinter.CTkLabel(self.loginframe, text="Password")
-        self.passwordlabel.grid(row=2, column=0, padx=10, sticky="NWE")
+        password_label = customtkinter.CTkLabel(login_frame, text="Password")
+        password_label.grid(row=2, column=0, padx=10, sticky="NWE")
         
-        self.emailinput = customtkinter.CTkEntry(self.loginframe)
-        self.emailinput.grid(row=1,column=1, sticky="NWE", padx = 10, pady=10)
+        self.email_input = customtkinter.CTkEntry(login_frame)
+        self.email_input.grid(row=1, column=1, sticky="NWE", padx = 10, pady=10)
 
-        self.passwordinput = customtkinter.CTkEntry(self.loginframe)
+        self.passwordinput = customtkinter.CTkEntry(login_frame)
         self.passwordinput.grid(row=2, column=1, sticky="NWE", padx = 10)
 
-        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Login", command=self.logindb)
-        self.loginbtn.grid(row=2, column=0, columnspan=2, pady=(200,10))
+        login_btn = customtkinter.CTkButton(login_frame, text="Login", command=self.login_db)
+        login_btn.grid(row=2, column=0, columnspan=2, pady=(200, 10))
 
-        self.registerbtn = customtkinter.CTkButton(self.loginframe, text="Register", command=self.reg)
-        self.registerbtn.grid(row=3, column=0, columnspan=2, pady=(10,10))
+        register_btn = customtkinter.CTkButton(login_frame, text="Register", command=self.reg)
+        register_btn.grid(row=3, column=0, columnspan=2, pady=(10, 10))
 
     def reg(self):
         self.destroy()
         subprocess.run(["python","register_page_f.py"])
 
-    def logindb(self):
+    def login_db(self):
         connection = sqlite3.connect("users/artsharer.db")
         cur = connection.cursor()
-        email = self.emailinput.get()
+        email = self.email_input.get()
         password = self.passwordinput.get()
 
         cur.execute("SELECT userID FROM loginfo WHERE email='{}' and password='{}'".format(email, password))
-        userID = cur.fetchone()[0]
+        user_id = cur.fetchone()[0]
 
-        if userID is None:
+        if user_id is None:
             print("Invalid email or password")
         
         else:

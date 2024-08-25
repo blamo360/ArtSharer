@@ -24,25 +24,20 @@ class Start(customtkinter.CTk):
         super().__init__()
 
         self.tag_input = None
+        self.add = None
         self.caption_input = None
         self.name_input = None
-        self.add = None
-        self.search_display = None
         self.img_title = None
-        self._w = None
         self.searchbar = None
+        self.search_display = None
         self.gallery = None
         self.main_window_frame = None
         self.menu_bar_frame = None
-
         self.geometry("1000x700")
 
-        self.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(
-            Image.open('img/icon.jpg')))  # type: ignore
-
         customtkinter.set_default_color_theme("assets/themes/customtheme.json")
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight = 1)
+        self.grid_rowconfigure(1, weight = 1)
 
         self.page_num = 0
         self.search_compiled = []
@@ -176,14 +171,14 @@ class Start(customtkinter.CTk):
         connection = sqlite3.connect("artsharer.db")
         cur = connection.cursor()
 
-        cur.execute(f"SELECT img_title FROM imginfo WHERE imgid = {imgid}")
+        cur.execute(f"SELECT imgTitle FROM imginfo WHERE imgid = {imgid}")
         img_title = (cur.fetchone())[0]
 
         img_frame = customtkinter.CTkFrame(self.gallery)
         title_name = customtkinter.CTkLabel(img_frame, text=img_title)
 
         # get image from
-        cur.execute(f"SELECT img_file_name FROM imginfo WHERE imgid = {imgid}")
+        cur.execute(f"SELECT imgFileName FROM imginfo WHERE imgid = {imgid}")
         img_file_name = cur.fetchone()
         img_file_name = img_file_name[0]
 
@@ -210,7 +205,7 @@ class Start(customtkinter.CTk):
             img_file_name = cur.fetchone()
             img_file_name = img_file_name[0]
 
-            cur.execute(f"SELECT img_title FROM imginfo WHERE imgid = {imgid}")
+            cur.execute(f"SELECT imgTitle FROM imginfo WHERE imgid = {imgid}")
             self.img_title = (cur.fetchone())[0]
             cur.execute(f"SELECT imgTags FROM imginfo WHERE imgid = {imgid}")
             img_tags = (cur.fetchone())[0]
@@ -334,7 +329,7 @@ class Start(customtkinter.CTk):
 
         tags = (self.tag_input.get().lower()).split(" ")
         tags_json = json.dumps(tags)
-        cur.execute("INSERT INTO imginfo (imgFileName, img_title,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(
+        cur.execute("INSERT INTO imginfo (imgFileName, imgTitle,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(
             img_file_name, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tags_json))
         connection.commit()
 

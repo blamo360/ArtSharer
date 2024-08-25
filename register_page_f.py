@@ -12,62 +12,64 @@ customtkinter.set_appearance_mode("light")
 class Login(Tk):
     def __init__(self):
         super().__init__()
+        self.password_conf_input = None
+        self.password_input = None
+        self.username_input = None
+        self.email_input = None
         self.geometry("500x700")
         self.configure(bg="#555555")
         self.resizable(False, False)
-
-        self.tk.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open("img\placeholders\iconn.png")))
 
         customtkinter.set_appearance_mode("dark")
         self.login()
   
 
     def login(self):
-        self.frame1 = customtkinter.CTkFrame(self, width=300, height=500)
-        self.frame1.place(relx=0.5, rely=0.5, anchor = CENTER)
+        main_frame = customtkinter.CTkFrame(self, width=300, height=500)
+        main_frame.place(relx=0.5, rely=0.5, anchor = CENTER)
 
-        self.loginframe = customtkinter.CTkFrame(self.frame1, width=300, height=450, fg_color="transparent")
-        self.loginframe.place(relx=0.5, rely=0.5, anchor=CENTER)
+        login_frame = customtkinter.CTkFrame(main_frame, width=300, height=450, fg_color="transparent")
+        login_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-        self.logoimg = ImageTk.PhotoImage(ImageOps.contain(Image.open("img\placeholders\iconn.png"), (100, 100)))
+        logo_img = ImageTk.PhotoImage(ImageOps.contain(Image.open("img\placeholders\iconn.png"), (100, 100)))
 
-        self.logo = Label(self.loginframe, image=self.logoimg) # type: ignore
-        self.logo.grid(row=0, column=0, columnspan=2, pady=10)
+        logo = Label(login_frame, image=logo_img) # type: ignore
+        logo.grid(row=0, column=0, columnspan=2, pady=10)
 
         #email
-        self.emaillabel = customtkinter.CTkLabel(self.loginframe, text="Email")
-        self.emaillabel.grid(row=1, column=0, padx=10, sticky="NWE")
+        email_label = customtkinter.CTkLabel(login_frame, text="Email")
+        email_label.grid(row=1, column=0, padx=10, sticky="NWE")
         
-        self.emailinput = customtkinter.CTkEntry(self.loginframe)
-        self.emailinput.grid(row=1, column=1, sticky="NWE", padx = 10)
+        self.email_input = customtkinter.CTkEntry(login_frame)
+        self.email_input.grid(row=1, column=1, sticky="NWE", padx = 10)
 
         #username
-        self.usernamelabel = customtkinter.CTkLabel(self.loginframe, text="Username")
-        self.usernamelabel.grid(row=2, column=0, padx=10, pady=10)
+        username_label = customtkinter.CTkLabel(login_frame, text="Username")
+        username_label.grid(row=2, column=0, padx=10, pady=10)
         
-        self.usernameinput = customtkinter.CTkEntry(self.loginframe)
-        self.usernameinput.grid(row=2,column=1, sticky="NWE", padx = 10, pady=10)
+        self.username_input = customtkinter.CTkEntry(login_frame)
+        self.username_input.grid(row=2,column=1, sticky="NWE", padx = 10, pady=10)
 
         #password plus confirmation
-        self.passwordlabel = customtkinter.CTkLabel(self.loginframe, text="Password")
-        self.passwordlabel.grid(row=3, column=0, padx=10, sticky="NWE")
+        password_label = customtkinter.CTkLabel(login_frame, text="Password")
+        password_label.grid(row=3, column=0, padx=10, sticky="NWE")
         
-        self.passwordinput = customtkinter.CTkEntry(self.loginframe)
-        self.passwordinput.grid(row=3, column=1, sticky="NWE", padx = 10, pady=(0,10))
+        self.password_input = customtkinter.CTkEntry(login_frame)
+        self.password_input.grid(row=3, column=1, sticky="NWE", padx = 10, pady=(0,10))
 
-        self.passwordconflabel = customtkinter.CTkLabel(self.loginframe, text="Confirm Password")
-        self.passwordconflabel.grid(row=4, column=0, padx=10, sticky="NWE")
+        password_conf_label = customtkinter.CTkLabel(login_frame, text="Confirm Password")
+        password_conf_label.grid(row=4, column=0, padx=10, sticky="NWE")
         
-        self.passwordconfinput = customtkinter.CTkEntry(self.loginframe)
-        self.passwordconfinput.grid(row=4, column=1, sticky="NWE", padx = 10)
+        self.password_conf_input = customtkinter.CTkEntry(login_frame)
+        self.password_conf_input.grid(row=4, column=1, sticky="NWE", padx = 10)
 
-        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Register", command=self.signup)
-        self.loginbtn.grid(row=5, column=0, columnspan=2, pady=(120,10))
+        login_btn = customtkinter.CTkButton(login_frame, text="Register", command=self.signup)
+        login_btn.grid(row=5, column=0, columnspan=2, pady=(120,10))
 
-        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Login", command=self.loginbwtn)
-        self.loginbtn.grid(row=6, column=0, columnspan=2, pady=(200,10))
+        login_btn = customtkinter.CTkButton(login_frame, text="Login", command=self.login_btn)
+        login_btn.grid(row=6, column=0, columnspan=2, pady=(200,10))
 
-    def loginbwtn(self):
+    def login_btn(self):
         self.destroy()
         subprocess.run(["python","login_page_f.py"])
     
@@ -76,47 +78,47 @@ class Login(Tk):
         cur = connection.cursor()
 
         #usernname validation
-        if not self.usernameinput.get().isalnum():
+        if not self.username_input.get().isalnum():
             print("false")
 
         
         else:
-            user = cur.execute("SELECT username FROM loginfo WHERE username='{}'".format(self.usernameinput.get()))
-            userver = user.fetchone()
+            user = cur.execute("SELECT username FROM loginfo WHERE username='{}'".format(self.username_input.get()))
+            user_ver = user.fetchone()
 
 
-            if userver != None:
+            if user_ver is not None:
                 print("Username already exists")
             else:
                 #password validation
-                if " " in self.passwordinput.get():
+                if " " in self.password_input.get():
                     print("No spaces in password")
 
-                elif len(self.passwordinput.get()) < 6:
+                elif len(self.password_input.get()) < 6:
                     print("Password must be larger than six characters")
 
-                elif self.passwordinput.get() != self.passwordconfinput.get():
+                elif self.password_input.get() != self.password_conf_input.get():
                     print("Passwords do not match")
 
                 else:
-                    mail = cur.execute("SELECT email FROM loginfo WHERE email = '{}'".format(self.emailinput.get()))
+                    mail = cur.execute("SELECT email FROM loginfo WHERE email = '{}'".format(self.email_input.get()))
                     emailver = mail.fetchone()
 
-                    if emailver != None:
+                    if emailver is not None:
                         print("Email already exists")
 
                     else:
                         #unique ID check
                         while True:
-                            newUserID = random.randint(0, 999999998)
-                            UserIDver = cur.execute("SELECT userID FROM loginfo WHERE userID = '{}'".format(newUserID))
-                            UserIDver = UserIDver.fetchone()
-                            print(newUserID)
-                            if UserIDver == None:
+                            new_user_id = random.randint(0, 999999998)
+                            user_id_ver = cur.execute("SELECT userID FROM loginfo WHERE userID = '{}'".format(new_user_id))
+                            user_id_ver = user_id_ver.fetchone()
+                            print(new_user_id)
+                            if user_id_ver is None:
                                 break
 
                         #add info
-                        cur.execute("INSERT INTO loginfo (userID,username,password,email) values({},'{}','{}','{}')".format(newUserID, self.usernameinput.get(), self.passwordinput.get(), self.emailinput.get()))
+                        cur.execute("INSERT INTO loginfo (userID,username,password,email) values({},'{}','{}','{}')".format(new_user_id, self.username_input.get(), self.password_input.get(), self.email_input.get()))
                         
                         connection.commit()
                         connection.close()

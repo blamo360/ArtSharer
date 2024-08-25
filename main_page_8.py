@@ -3,12 +3,9 @@ from tkinter import *
 from PIL import Image, ImageTk, ImageOps
 import customtkinter
 import sqlite3
-from login_page_4 import Login
 from tkinter import filedialog as fd
-import random
 import json
 import shutil
-from pathlib import Path
 import os
 
 
@@ -18,7 +15,6 @@ class Start(Tk):
 
         self.geometry("1000x700")
 
-        self.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open('img/icon.jpg')))
 
         customtkinter.set_appearance_mode("dark")
         self.grid_columnconfigure(1, weight=1)
