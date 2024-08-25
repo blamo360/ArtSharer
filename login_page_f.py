@@ -10,29 +10,22 @@ class Login(Tk):
         self.geometry("500x700")
         self.configure(bg="#555555")
 
-        self.tk.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open("img\placeholders\iconn.png")))
+        self.tk.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open("img/placeholders/iconn.png"))) # type: ignore
 
+        customtkinter.set_appearance_mode("dark")
         self.login()
         self.resizable(False, False)
 
     def login(self):
-        self.img1 = Image.open("img/placeholders/forest-1072828_640.jpg")
-        self.img1 = self.img1.point(lambda p: p * 0.3)
-        self.img1 = ImageOps.contain(self.img1, (10000, 700))
-        self.bgimg = ImageTk.PhotoImage(self.img1)
-        self.bg = Label(self, image = self.bgimg)
-
         self.frame1 = customtkinter.CTkFrame(self, width=300, height=500)
-
-        self.bg.place(relx= 0.5, rely= 0.5, relheight= 1, relwidth=1, anchor= CENTER)
         self.frame1.place(relx=0.5, rely=0.5, anchor = CENTER)
 
         self.loginframe = customtkinter.CTkFrame(self.frame1, width=300, height=450, fg_color="transparent")
         self.loginframe.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-        self.logoimg = ImageTk.PhotoImage(ImageOps.contain(Image.open("img\placeholders\iconn.png"), (100, 100)))
+        self.logoimg = ImageTk.PhotoImage(ImageOps.contain(Image.open("img/placeholders/iconn.png"), (100, 100)))
 
-        self.logo = Label(self.loginframe, image=self.logoimg)
+        self.logo = Label(self.loginframe, image=self.logoimg) # type: ignore
         self.logo.grid(row=0, column=0, columnspan=2, pady=10)
 
         self.loginlabel = customtkinter.CTkLabel(self.loginframe, text="Email")
@@ -55,7 +48,7 @@ class Login(Tk):
 
     def reg(self):
         self.destroy()
-        subprocess.run(["python","register_page_2.py"])
+        subprocess.run(["python","register_page_f.py"])
 
     def logindb(self):
         connection = sqlite3.connect("users/artsharer.db")
@@ -74,3 +67,6 @@ class Login(Tk):
             self.destroy()
             subprocess.run(["python", "main_page_f.py"])
 
+if __name__ == "__main__":
+    root = Login()
+    root.mainloop()

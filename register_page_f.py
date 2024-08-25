@@ -61,12 +61,15 @@ class Login(Tk):
         self.passwordconfinput = customtkinter.CTkEntry(self.loginframe)
         self.passwordconfinput.grid(row=4, column=1, sticky="NWE", padx = 10)
 
-        #Register button2
         self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Register", command=self.signup)
         self.loginbtn.grid(row=5, column=0, columnspan=2, pady=(120,10))
 
+        self.loginbtn = customtkinter.CTkButton(self.loginframe, text="Login", command=self.loginbwtn)
+        self.loginbtn.grid(row=6, column=0, columnspan=2, pady=(200,10))
 
-
+    def loginbwtn(self):
+        self.destroy()
+        subprocess.run(["python","login_page_f.py"])
     
     def signup(self):
         connection = sqlite3.connect("artsharer.db")
@@ -103,7 +106,6 @@ class Login(Tk):
                         print("Email already exists")
 
                     else:
-
                         #unique ID check
                         while True:
                             newUserID = random.randint(0, 999999998)
@@ -112,12 +114,9 @@ class Login(Tk):
                             print(newUserID)
                             if UserIDver == None:
                                 break
-                        
-                        userSettings = '{"theme": "dark"}'
+
                         #add info
                         cur.execute("INSERT INTO loginfo (userID,username,password,email) values({},'{}','{}','{}')".format(newUserID, self.usernameinput.get(), self.passwordinput.get(), self.emailinput.get()))
-                        #creates new user info fields
-                        cur.execute("INSERT INTO userinfo (userID,value) values({},'{}')".format(newUserID, userSettings))
                         
                         connection.commit()
                         connection.close()

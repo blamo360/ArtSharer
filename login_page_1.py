@@ -11,7 +11,7 @@ img1 = Image.open("img/placeholders/forest-1072828_640.jpg")
 img1 = img1.point(lambda p: p * 0.3)
 img1 = ImageOps.contain(img1, (10000, 700))
 bgimg = ImageTk.PhotoImage(img1)
-bg = Label(root, image = bgimg)
+bg = Label(root, image = bgimg) # type: ignore
 
 frame1 = Frame(root, bg = "#cccccc")
 

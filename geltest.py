@@ -1,16 +1,12 @@
-import asyncio
-from python_gelbooru import AsyncGelbooru
+import customtkinter
 
-api_key, user_id = ("haha_not", "telling_you")
-async def main():
-    async with AsyncGelbooru(api_key=api_key,
-                             user_id=user_id) as gel:
-        yuyu = await gel.search_posts(['saigyouji yuyuko', 'rating:explicit'], limit=10, random=True)
-       
+def button_callback():
+    print("button clicked")
 
-        tasks = [i.async_download(f"./arts/{i.id}") for i in yuyu]
-        await asyncio.gather(*tasks)
+app = customtkinter.CTk()
+app.geometry("400x150")
 
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+button = customtkinter.CTkButton(app, text="my button", command=button_callback)
+button.pack(padx=20, pady=20)
+
+app.mainloop()

@@ -20,9 +20,7 @@ class Start(Tk):
 
         self.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open('img/icon.jpg')))
 
-        self.call("source", "assets/themes/Azure-ttk-theme-2.1.0/azure.tcl")
-        self.call("set_theme", "dark")
-
+        customtkinter.set_appearance_mode("dark")
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
@@ -34,18 +32,13 @@ class Start(Tk):
         self.main_page()
         self.menu_bar()
         self.search_bar()
-        self.main_filter_bar()
         self.minor_filter_bar()
         self.upload_button()
         self.search()
 
-
     def main_page(self):
         self.menu_bar_frame = customtkinter.CTkFrame(self)
         self.menu_bar_frame.grid(row=0, column=0, columnspan= 2, sticky= "WE", padx= 5, pady= (5,0))
-
-        self.main_filter_frame = customtkinter.CTkFrame(self)
-        self.main_filter_frame.grid(row=1, column=0, sticky = "NSWE", padx= (5,0), pady = 5)
 
         self.main_window_frame = customtkinter.CTkFrame(self)
         self.main_window_frame.grid(row=1, column=1, sticky = "NSWE", padx= 5, pady= 5)
@@ -136,8 +129,8 @@ class Start(Tk):
                         search2 = tag
 
                         for j in search1:
-                            for n in search2:
-                                if j == n:
+                            for k in search2:
+                                if j == k:
                                     self.searchcompiled.append(j)
                             else:
                                 continue
@@ -184,7 +177,6 @@ class Start(Tk):
 
     def postinfo(self, imgID):
         if self.postwindow is None or not self.postwindow.winfo_exists():
-            self.postwindow = customtkinter.CTkToplevel(self)
 
             connection = sqlite3.connect("artsharer.db")
             cur = connection.cursor()
@@ -199,22 +191,29 @@ class Start(Tk):
             newpic = ImageTk.PhotoImage(resized)
 
             image_dimensions = "%dx%d" % (width, height)
+            
+            self.grid_rowconfigure(1, weight = 1)
+            self.postwindow = customtkinter.CTkToplevel(self)
+            
+            post_frame = customtkinter.CTkFrame(self.postwindow)
+            post_frame.grid(row = 0, column = 0, padx = 5, pady = 5, sticky = "NWSE")
+
+            image_label = customtkinter.CTkLabel(post_frame, image=newpic, text="") # type: ignore
+            image_label.grid(row = 0, column = 0, rowspan = 3, padx = 10, pady = 10, sticky = "NSEW")
+            size_label = customtkinter.CTkLabel(post_frame, text = image_dimensions)
+
+            title = customtkinter.CTkLabel(post_frame)
+            caption = customtkinter.CTkLabel(post_frame)
+            tags = customtkinter.CTkLabel(post_frame)
+            
+            size_label.grid(row = 3, column = 0, sticky = "SEW", pady = 5)
+            
+            title.grid(row = 0, column = 1, sticky = "NEW")
+            caption.grid(row = 1, column = 1, sticky = "NSEW")
+            tags.grid(row = 2, column = 1, sticky = "NEW")
+
 
             cur.close()
-
-
-
-
-
-    def main_filter_bar(self):
-        mainfilterselect = ["quknhjhan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
-        frame2len = list(range(0,len(mainfilterselect)))
-        self.main_filter_frame.rowconfigure(frame2len, weight=1)
-        self.main_filter_frame.columnconfigure(0, weight=1)
-
-        for i in range(len(mainfilterselect)):
-            btn1 = customtkinter.CTkButton(self.main_filter_frame, text = mainfilterselect[i])
-            btn1.grid(row=i,column=0,sticky="W", padx= 10, pady= 10)
 
     def minor_filter_bar(self):
         minorfilters = ["quan", "too", "too", "too", "too", "too", "too", "too", "too", "too"]
@@ -325,7 +324,6 @@ class Start(Tk):
             
             connection.commit()
             connection.close()
-
 
 if __name__ == "__main__":
     root = Start()
