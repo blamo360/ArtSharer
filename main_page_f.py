@@ -29,7 +29,6 @@ class Start(customtkinter.CTk):
         self.name_input = None
         self.img_title = None
         self.searchbar = None
-        self.search_display = None
         self.gallery = None
         self.main_window_frame = None
         self.menu_bar_frame = None
@@ -65,7 +64,6 @@ class Start(customtkinter.CTk):
         self.gallery.grid(row=0, column=0, sticky="NSEW", padx=5, pady=5)
 
     def menu_bar(self):
-
         search_frame = customtkinter.CTkFrame(self.menu_bar_frame)
         search_frame.grid(row=0, column=0, sticky="EW", padx=10, pady=10)
         search_frame.grid_columnconfigure(0, weight=10)
@@ -92,15 +90,18 @@ class Start(customtkinter.CTk):
 
     def search(self):
         # returns list(img_ids)
+        global search_compare1, search_compare2
         searchcompare = 0
         search_num = 0
         self.page_num = 0
         searchstring = self.searchbar.get()
+
         if searchstring == "":
             search_list = []
         else:
             search_list = (searchstring.lower()).split(" ")
-            for i in search_list:
+            print(search_list)
+            for i, j in enumerate(search_list):
                 search_list[i] = search_list[i].replace(" ", "")
 
         connection = sqlite3.connect("artsharer.db")
@@ -115,40 +116,42 @@ class Start(customtkinter.CTk):
         elif len(search_list) == 1:
             # for single searches
             print(
-                f"SELECT imgids FROM taginfo WHERE tagName = {search_list[0]}")
+                f"SELECT imgids FROM taginfo WHERE tagName = '{search_list[0]}'")
             cur.execute(
-                f"SELECT imgids FROM taginfo WHERE tagName = {search_list[0]}")
+                f"SELECT imgids FROM taginfo WHERE tagName = '{search_list[0]}'")
             tag = cur.fetchone()
 
             if tag is None:
                 # tag does not exist
-                CTkMessagebox(message="tag does not exist!")
+                CTkMessagebox(message = "tag does not exist!")
 
             else:
+                tag = cur.fetchone()[0]
                 tag = json.loads(tag)
                 self.search_compiled = tag
         else:
             # for multiple tags
             for i in search_list:
-                cur.execute(f"SELECT imgids FROM taginfo WHERE tagName = {i}")
-                tag = cur.fetchone()
+                cur.execute(f"SELECT imgids FROM taginfo WHERE tagName = '{i}'")
+                tag = cur.fetchone()[0]
                 tag = json.loads(tag)
 
                 if tag is None:
                     # tag does not exist
-                    CTkMessagebox(message="tag(s) does not exist!")
+                    CTkMessagebox(message = "tag(s) does not exist!")
                     break
                 else:
                     if search_num == 0:
-                        searchcompare = tag
+                        search_compare1 = tag
+                        search_num = search_num + 1
+                    elif search_num == 1:
+                        search_compare2 = tag
+                        self.search_compiled = list(set.intersection(*map(set, [search_compare1, search_compare2])))
                         search_num = search_num + 1
                     else:
-                        search2 = tag
-
-                        for j in searchcompare:
-                            for k in search2:
-                                if j == k:
-                                    self.search_compiled.append(j)
+                        search_compare1 = tag
+                        self.search_compiled = list(set.intersection(*map(set, [search_compare1, search_compare2])))
+                        search_num - 1
 
         self.update_gallery()
 
@@ -156,9 +159,11 @@ class Start(customtkinter.CTk):
         # updates gallery grids
         x = 0
         y = 0
-        self.search_display = self.search_compiled[self.page_num:(
-            self.page_num + 20)]
-        for i in self.search_display:
+
+        for i in self.gallery.winfo_children():
+            i.destroy()
+
+        for i in self.search_compiled:
             if x <= 5:
                 self.img_gallery(i, x, y)
                 x = x + 1

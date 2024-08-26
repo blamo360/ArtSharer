@@ -4,7 +4,7 @@ from PIL import Image, ImageTk, ImageOps
 import sqlite3
 import subprocess
 
-class Login(Tk):
+class Login(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.passwordinput = None
@@ -12,11 +12,11 @@ class Login(Tk):
         self.geometry("500x700")
         self.configure(bg="#555555")
 
-        self.tk.call('wm', 'iconphoto', self._w, ImageTk.PhotoImage(Image.open("img/placeholders/iconn.png"))) # type: ignore
 
         customtkinter.set_appearance_mode("dark")
         self.login()
         self.resizable(False, False)
+        customtkinter.set_default_color_theme("assets/themes/customtheme.json")
 
     def login(self):
         main_frame = customtkinter.CTkFrame(self, width=300, height=500)
@@ -24,11 +24,6 @@ class Login(Tk):
 
         login_frame = customtkinter.CTkFrame(main_frame, width=300, height=450, fg_color="transparent")
         login_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
-
-        logo_img = ImageTk.PhotoImage(ImageOps.contain(Image.open("img/placeholders/iconn.png"), (100, 100)))
-
-        logo = Label(login_frame, image=logo_img) # type: ignore
-        logo.grid(row=0, column=0, columnspan=2, pady=10)
 
         login_label = customtkinter.CTkLabel(login_frame, text="Email")
         login_label.grid(row=1, column=0, padx=10, pady=10)
