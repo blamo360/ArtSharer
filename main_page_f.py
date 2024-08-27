@@ -19,6 +19,7 @@ def loginwin():
     #opens login page
     subprocess.run(["python", "login_page_f.py"])
 
+
 class Start(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -35,8 +36,8 @@ class Start(customtkinter.CTk):
         self.geometry("1000x700")
 
         customtkinter.set_default_color_theme("assets/themes/customtheme.json")
-        self.grid_columnconfigure(1, weight = 1)
-        self.grid_rowconfigure(1, weight = 1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(1, weight=1)
 
         self.page_num = 0
         self.search_compiled = []
@@ -123,7 +124,7 @@ class Start(customtkinter.CTk):
 
             if tag is None:
                 # tag does not exist
-                CTkMessagebox(message = "tag does not exist!")
+                CTkMessagebox(message="tag does not exist!")
 
             else:
                 tag = cur.fetchone()[0]
@@ -138,7 +139,7 @@ class Start(customtkinter.CTk):
 
                 if tag is None:
                     # tag does not exist
-                    CTkMessagebox(message = "tag(s) does not exist!")
+                    CTkMessagebox(message="tag(s) does not exist!")
                     break
                 else:
                     if search_num == 0:
@@ -260,14 +261,13 @@ class Start(customtkinter.CTk):
 
             cur.close()
 
-
     def upload_button(self):
         add_btn = customtkinter.CTkButton(
             self.main_window_frame, text="+", width=75, height=75, command=self.upload_page)
         add_btn.place(anchor="se", relx=1, rely=1, x=-30, y=-30)
 
     def upload_page(self):
-        
+
         if self.upload is None or not self.upload.winfo_exists():
             # file upload
             self.add = fd.askopenfilename()
@@ -334,8 +334,9 @@ class Start(customtkinter.CTk):
 
         tags = (self.tag_input.get().lower()).split(" ")
         tags_json = json.dumps(tags)
-        cur.execute("INSERT INTO imginfo (imgFileName, imgTitle,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(
-            img_file_name, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tags_json))
+        cur.execute(
+            "INSERT INTO imginfo (imgFileName, imgTitle,imgCaptions,imgTags) values('{}', '{}','{}','{}')".format(
+                img_file_name, self.name_input.get(), self.caption_input.get('1.0', 'end-1c'), tags_json))
         connection.commit()
 
         cur.execute("SELECT imgid FROM imginfo ORDER BY imgid DESC LIMIT 1")
